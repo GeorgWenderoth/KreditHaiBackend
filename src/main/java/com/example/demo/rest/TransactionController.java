@@ -26,7 +26,6 @@ public class TransactionController {
     @PostMapping("/neueTransaktion")
     public ResponseEntity<TransactionElement> newTransaction(@RequestBody TransactionElement element){
 
-
         final TransactionElement transactionElement = service.createElement(element);
         return  new ResponseEntity<>(transactionElement, HttpStatus.CREATED); // Warum nochmal returnen
 

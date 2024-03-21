@@ -40,6 +40,10 @@ public class TransactionElement {
         this.notes = notes;
     }
 
+    public TransactionElement(){
+
+    }
+
     // Getter und Setter
     public int getId() {
         return id;

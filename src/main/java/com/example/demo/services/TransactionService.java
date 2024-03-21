@@ -22,10 +22,13 @@ public class TransactionService {
     }
 
     public TransactionElement createElement(TransactionElement element){
-        return repository.save(element);
+
+            return repository.save(element);
     }
 
+
     public List<TransactionElement> getTransactionElementsByDebitorId(int debitorId){
+
         return repository.findAllByDebitorId(debitorId);
     }
 
