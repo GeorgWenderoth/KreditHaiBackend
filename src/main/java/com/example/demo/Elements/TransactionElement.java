@@ -1,8 +1,7 @@
 package com.example.demo;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity //gibt bekannt das, dass Element eine Jpa entity ist -> Repository
@@ -11,14 +10,19 @@ import java.util.Date;
 
 
 
-
-
+@Table(name = "transaction")
 public class TransactionElement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "debitor_id")
     private int debitorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "debitor_id", referencedColumnName = "itId", insertable = false, updatable = false)
+    @JsonIgnore // Ignoriere das verknüpfte Debitor-Objekt beim Serialisieren
+    private DebitorElement debitorElement;
     private String purpose;
     private double amount;
     private Date borrowDate;
@@ -32,6 +36,7 @@ public class TransactionElement {
     public TransactionElement(int id, int debitorId, String purpose, double amount, Date borrowDate, double interestRate, Date interestStartDate, String notes) {
         this.id = id;
         this.debitorId = debitorId;
+       // this.debitorElement = debitorElement;
         this.purpose = purpose;
         this.amount = amount;
         this.borrowDate = borrowDate;
@@ -60,6 +65,8 @@ public class TransactionElement {
     public void setDebitorId(int debitorId) {
         this.debitorId = debitorId;
     }
+
+
 
     public String getPurpose() {
         return purpose;
@@ -115,6 +122,15 @@ public class TransactionElement {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+
+    public DebitorElement getDebitorElement() {
+        return debitorElement;
+    }
+
+    public void setDebitorElement(DebitorElement debitorElement) {
+        this.debitorElement = debitorElement;
     }
 }
 

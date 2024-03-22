@@ -27,7 +27,7 @@ public class TransactionService {
     }
 
 
-    public List<TransactionElement> getTransactionElementsByDebitorId(int debitorId){
+   public List<TransactionElement> getTransactionElementsByDebitorId(int debitorId){
 
         return repository.findAllByDebitorId(debitorId);
     }
