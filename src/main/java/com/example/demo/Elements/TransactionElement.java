@@ -1,13 +1,10 @@
-package com.example.demo;
+package com.example.demo.Elements;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.Date;
 
 @Entity //gibt bekannt das, dass Element eine Jpa entity ist -> Repository
-
-
-
 
 
 @Table(name = "transaction")

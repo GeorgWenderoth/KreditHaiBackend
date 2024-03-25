@@ -1,7 +1,6 @@
 package com.example.demo.services;
 
-import com.example.demo.PayBackTransactionElement;
-import com.example.demo.TransactionElement;
+import com.example.demo.Elements.PayBackTransactionElement;
 import com.example.demo.repositorys.PayBackTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

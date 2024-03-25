@@ -1,20 +1,32 @@
-package com.example.demo;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+package com.example.demo.Elements;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
+@Table(name = "payBackTransaction")
 public class PayBackTransactionElement {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name= "transaction_id")
     private int transactionId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "transaction_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JsonIgnore // Ignoriere das verknüpfte Debitor-Objekt beim Serialisieren
+    private TransactionElement transactionElement;
+
+    @Column(name = "debitor_id")
     private int debitorId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "debitor_id", referencedColumnName = "itId", insertable = false, updatable = false)
+    @JsonIgnore // Ignoriere das verknüpfte Debitor-Objekt beim Serialisieren
+    private DebitorElement debitorElement;
 
     private double amount;
 

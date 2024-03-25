@@ -1,14 +1,12 @@
 package com.example.demo.services;
 
-import com.example.demo.DebitorElement;
-import com.example.demo.PayBackTransactionElement;
+import com.example.demo.Elements.DebitorElement;
 import com.example.demo.repositorys.DebitorRepository;
 import com.example.demo.rest.ElementNichtVorhanden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class DebitorService {

@@ -1,7 +1,7 @@
 package com.example.demo.rest;
 
 
-import com.example.demo.TransactionElement;
+import com.example.demo.Elements.TransactionElement;
 import com.example.demo.services.TransactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

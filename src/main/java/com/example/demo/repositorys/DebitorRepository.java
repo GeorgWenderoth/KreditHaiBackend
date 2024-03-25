@@ -1,6 +1,6 @@
 package com.example.demo.repositorys;
 
-import com.example.demo.DebitorElement;
+import com.example.demo.Elements.DebitorElement;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,7 +1,7 @@
 package com.example.demo.rest;
 
 
-import com.example.demo.DebitorElement;
+import com.example.demo.Elements.DebitorElement;
 import com.example.demo.services.DebitorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
