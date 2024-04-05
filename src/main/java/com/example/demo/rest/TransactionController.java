@@ -34,21 +34,12 @@ public class TransactionController {
     @CrossOrigin
     @PostMapping("/neueTransaktion")
     public ResponseEntity<TransactionElement> newTransaction(@RequestBody TransactionElement element){
-
         final TransactionElement transactionElement = service.createElement(element);
-         DebitorElement debitorElement = transactionElement.getDebitorElement();
-        // calculateDebtsForDebitor(debitorElement, transactionElement.getAmount());
-         debitorService.calculateDebtsForDebitor(transactionElement.getDebitorId(), transactionElement.getAmount());
+        debitorService.calculateDebtsForDebitor(transactionElement.getDebitorId(), transactionElement.getAmount());
         return  new ResponseEntity<>(transactionElement, HttpStatus.CREATED); // Warum nochmal returnen
 
     }
 
-   /* private void calculateDebtsForDebitor(DebitorElement debitorElement, double amount) {
-
-            double newAmount = debitorElement.getAmount() + amount;
-            debitorElement.setAmount(newAmount);
-
-    } */
 
     @CrossOrigin
     @GetMapping ("/alleTransaktionen")

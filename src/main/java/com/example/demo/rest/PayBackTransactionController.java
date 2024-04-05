@@ -3,6 +3,7 @@ package com.example.demo.rest;
 
 import com.example.demo.Elements.PayBackTransactionElement;
 
+import com.example.demo.services.DebitorService;
 import com.example.demo.services.PayBackTransactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,18 @@ public class PayBackTransactionController {
 
 
     public PayBackTransactionService service;
+    private final DebitorService debitorService;
 
-    public PayBackTransactionController(PayBackTransactionService payBackTransactionService){
+    public PayBackTransactionController(PayBackTransactionService payBackTransactionService, DebitorService debitorService){
         this.service = payBackTransactionService;
+        this.debitorService = debitorService;
     }
 
     @CrossOrigin
     @PostMapping("/neuePayBackTransaktion")
     public ResponseEntity<PayBackTransactionElement> newPayBackTransaction(@RequestBody PayBackTransactionElement element){
         final PayBackTransactionElement payBackTransactionElement = service.createElement(element);
+        debitorService.calculateDebtsForDebitor(payBackTransactionElement.getDebitorId(), payBackTransactionElement.getAmount());
         return  new ResponseEntity<>(payBackTransactionElement, HttpStatus.CREATED); // Warum nochmal returnen
     }
 
