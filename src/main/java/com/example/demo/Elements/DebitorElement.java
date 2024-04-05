@@ -15,7 +15,7 @@ public class DebitorElement {  // Hier sind die daten für das gesamte json obje
     private int itId;
     private String debitorName;
     private boolean strich;
-    private int amount;
+    private double amount;
 
     private String notizen;
 
@@ -61,11 +61,11 @@ public class DebitorElement {  // Hier sind die daten für das gesamte json obje
         this.strich = strich;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 

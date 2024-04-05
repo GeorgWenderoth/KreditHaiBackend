@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DebitorService {
@@ -34,4 +35,23 @@ public class DebitorService {
         return this.repository.findByDebitorName(name).orElseThrow(()-> new ElementNichtVorhanden("Das Gesuchte Element ist nicht vorhanden"));
     }
 
+    public void calculateDebtsForDebitor(int id, double amount) {
+        DebitorElement debitorElement;
+        Optional<DebitorElement> optionalDebitor = repository.findByItId(id);
+        if (optionalDebitor.isPresent()) {
+            // Hier auf debitorElement zugreifen
+            debitorElement = optionalDebitor.get();
+            double newAmount = debitorElement.getAmount() + amount;
+            debitorElement.setAmount(newAmount);
+
+            repository.save(debitorElement);
+
+        } else {
+            // Hier den Fall behandeln, das kein Debitor-Element gefunden wurde
+        }
+
+
+
+
+    }
 }

@@ -2,10 +2,13 @@ package com.example.demo.rest;
 
 
 import com.example.demo.Elements.TransactionElement;
+import com.example.demo.services.DebitorService;
 import com.example.demo.services.TransactionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import com.example.demo.Elements.DebitorElement;
 
 import java.util.List;
 
@@ -17,19 +20,35 @@ import java.util.List;
 public class TransactionController {
 
     public TransactionService service;
+    //private final TransactionService transactionService;
+    private final DebitorService debitorService;
 
-    public TransactionController(TransactionService transactionService){
+
+    public TransactionController(TransactionService transactionService, DebitorService debitorService ){
         this.service = transactionService;
+        this.debitorService = debitorService;
     }
+
+
 
     @CrossOrigin
     @PostMapping("/neueTransaktion")
     public ResponseEntity<TransactionElement> newTransaction(@RequestBody TransactionElement element){
 
         final TransactionElement transactionElement = service.createElement(element);
+         DebitorElement debitorElement = transactionElement.getDebitorElement();
+        // calculateDebtsForDebitor(debitorElement, transactionElement.getAmount());
+         debitorService.calculateDebtsForDebitor(transactionElement.getDebitorId(), transactionElement.getAmount());
         return  new ResponseEntity<>(transactionElement, HttpStatus.CREATED); // Warum nochmal returnen
 
     }
+
+   /* private void calculateDebtsForDebitor(DebitorElement debitorElement, double amount) {
+
+            double newAmount = debitorElement.getAmount() + amount;
+            debitorElement.setAmount(newAmount);
+
+    } */
 
     @CrossOrigin
     @GetMapping ("/alleTransaktionen")

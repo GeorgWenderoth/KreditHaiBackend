@@ -26,6 +26,10 @@ public class TransactionService {
             return repository.save(element);
     }
 
+   /* public void updateDebt() {
+        repository.
+    } */
+
 
    public List<TransactionElement> getTransactionElementsByDebitorId(int debitorId){
 
