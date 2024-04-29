@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.Elements.TransactionElement;
 import com.example.demo.repositorys.TransactionRepository;
+import com.example.demo.rest.ElementNichtVorhanden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,8 @@ public class TransactionService {
     }
 
     public List<TransactionElement> getElements(){
+        System.out.println("getElements TransactionService");
+        System.out.println("t " + repository.findAll());
         return repository.findAll();
     }
 
@@ -26,10 +29,14 @@ public class TransactionService {
             return repository.save(element);
     }
 
-   /* public void updateDebt() {
-        repository.
-    } */
+    public TransactionElement searchElement(int id){
+        return repository.findById(id).orElseThrow(() -> new ElementNichtVorhanden("Das Gesuchte Element ist nicht vorhanden"));
+    }
+    public TransactionElement updateElement(TransactionElement element){
+       // TransactionElement transactionElement = this.searchElement(element.getId());
 
+        return repository.save(element);
+    }
 
    public List<TransactionElement> getTransactionElementsByDebitorId(int debitorId){
 

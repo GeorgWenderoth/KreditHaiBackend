@@ -2,7 +2,7 @@ package com.example.demo.Elements;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.time.LocalDate;
 
 @Entity //gibt bekannt das, dass Element eine Jpa entity ist -> Repository
 
@@ -21,25 +21,32 @@ public class TransactionElement {
     @JsonIgnore // Ignoriere das verknüpfte Debitor-Objekt beim Serialisieren
     private DebitorElement debitorElement;
     private String purpose;
+    private double originalAmount;
+
     private double amount;
-    private Date borrowDate;
+    private LocalDate borrowDate;
     private double interestRate;
 
     private int interestFrequency;
-    private Date interestStartDate;
+    private LocalDate interestStartDate;
     private String notes;
 
+    @JsonIgnore
+    private LocalDate lastInterstDate;
+
     // Konstruktor
-    public TransactionElement(int id, int debitorId, String purpose, double amount, Date borrowDate, double interestRate, Date interestStartDate, String notes) {
+    public TransactionElement(int id, int debitorId, String purpose, double amount, LocalDate borrowDate, double interestRate, LocalDate interestStartDate, String notes) {
         this.id = id;
         this.debitorId = debitorId;
        // this.debitorElement = debitorElement;
         this.purpose = purpose;
+        this.originalAmount = amount;
         this.amount = amount;
         this.borrowDate = borrowDate;
         this.interestRate = interestRate;
         this.interestStartDate = interestStartDate;
         this.notes = notes;
+        this.lastInterstDate = interestStartDate;
     }
 
     public TransactionElement(){
@@ -73,6 +80,14 @@ public class TransactionElement {
         this.purpose = purpose;
     }
 
+    public double getOriginalAmount() {
+        return originalAmount;
+    }
+
+    public void setOriginalAmount(double originalAmount) {
+        this.originalAmount = originalAmount;
+    }
+
     public double getAmount() {
         return amount;
     }
@@ -81,11 +96,11 @@ public class TransactionElement {
         this.amount = amount;
     }
 
-    public Date getBorrowDate() {
+    public LocalDate getBorrowDate() {
         return borrowDate;
     }
 
-    public void setBorrowDate(Date borrowDate) {
+    public void setBorrowDate(LocalDate borrowDate) {
         this.borrowDate = borrowDate;
     }
 
@@ -105,11 +120,11 @@ public class TransactionElement {
         this.interestFrequency = interestFrequency;
     }
 
-    public Date getInterestStartDate() {
+    public LocalDate getInterestStartDate() {
         return interestStartDate;
     }
 
-    public void setInterestStartDate(Date interestStartDate) {
+    public void setInterestStartDate(LocalDate interestStartDate) {
         this.interestStartDate = interestStartDate;
     }
 
@@ -128,6 +143,14 @@ public class TransactionElement {
 
     public void setDebitorElement(DebitorElement debitorElement) {
         this.debitorElement = debitorElement;
+    }
+
+    public LocalDate getLastInterstDate() {
+        return lastInterstDate;
+    }
+
+    public void setLastInterstDate(LocalDate lastInterstDate) {
+        this.lastInterstDate = lastInterstDate;
     }
 }
 

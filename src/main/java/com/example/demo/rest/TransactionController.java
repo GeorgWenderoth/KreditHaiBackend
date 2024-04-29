@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.demo.Elements.DebitorElement;
-
 import java.util.List;
 
 @RestController
@@ -35,7 +33,7 @@ public class TransactionController {
     @PostMapping("/neueTransaktion")
     public ResponseEntity<TransactionElement> newTransaction(@RequestBody TransactionElement element){
         final TransactionElement transactionElement = service.createElement(element);
-        debitorService.calculateDebtsForDebitor(transactionElement.getDebitorId(), transactionElement.getAmount());
+        debitorService.calculateDebtsForDebitor(transactionElement.getDebitorId(), transactionElement.getOriginalAmount());
         return  new ResponseEntity<>(transactionElement, HttpStatus.CREATED); // Warum nochmal returnen
 
     }
