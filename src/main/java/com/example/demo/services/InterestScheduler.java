@@ -45,7 +45,7 @@ public class InterestScheduler {
            System.out.println( e);
        }
         transactionElements = transactionService.getElements();
-        System.out.println("transactionEleents: " + transactionElements);
+
         LocalDate currentDate =  LocalDate.now();
       //  System.out.println("transactionEleents: " + transactionElements);
         if(transactionElements.isEmpty()){
@@ -54,12 +54,7 @@ public class InterestScheduler {
 
                 System.out.println("not empty");
             for (TransactionElement t : transactionElements) {
-                System.out.println("for");
-                System.out.println("for" + t.getLastInterstDate());
-                System.out.println("for" + t.getInterestStartDate());
 
-                System.out.println("for" + t.getOriginalAmount());
-                System.out.println("for" + t.getAmount());
                 long passedDays = ChronoUnit.DAYS.between(t.getInterestStartDate(), currentDate);
                 long payDays = passedDays / t.getInterestFrequency();
 
