@@ -32,10 +32,11 @@ public class TransactionElement {
     private String notes;
 
     @JsonIgnore
-    private LocalDate lastInterstDate;
+    private LocalDate lastInterestDate;
 
     // Konstruktor
-    public TransactionElement(int id, int debitorId, String purpose, double amount, LocalDate borrowDate, double interestRate, LocalDate interestStartDate, String notes) {
+    public TransactionElement(int id, int debitorId, String purpose, double amount, LocalDate borrowDate,
+                              double interestRate, int interestFrequency, LocalDate interestStartDate, String notes) {
         this.id = id;
         this.debitorId = debitorId;
        // this.debitorElement = debitorElement;
@@ -44,9 +45,10 @@ public class TransactionElement {
         this.amount = amount;
         this.borrowDate = borrowDate;
         this.interestRate = interestRate;
+        this.interestFrequency = interestFrequency;
         this.interestStartDate = interestStartDate;
         this.notes = notes;
-        this.lastInterstDate = interestStartDate;
+        this.lastInterestDate = interestStartDate;
     }
 
     public TransactionElement(){
@@ -145,12 +147,12 @@ public class TransactionElement {
         this.debitorElement = debitorElement;
     }
 
-    public LocalDate getLastInterstDate() {
-        return lastInterstDate;
+    public LocalDate getLastInterestDate() {
+        return lastInterestDate;
     }
 
-    public void setLastInterstDate(LocalDate lastInterstDate) {
-        this.lastInterstDate = lastInterstDate;
+    public void setLastInterestDate(LocalDate lastInterestDate) {
+        this.lastInterestDate = lastInterestDate;
     }
 }
 

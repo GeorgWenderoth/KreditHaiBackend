@@ -26,14 +26,17 @@ public class TransactionService {
 
     public TransactionElement createElement(TransactionElement element){
 
-            return repository.save(element);
+            TransactionElement transactionElement = new TransactionElement(
+                    element.getId(), element.getDebitorId(), element.getPurpose(), element.getAmount(), element.getBorrowDate(),
+                    element.getInterestRate(), element.getInterestFrequency(), element.getInterestStartDate(),element.getNotes());
+
+            return repository.save(transactionElement);
     }
 
     public TransactionElement searchElement(int id){
         return repository.findById(id).orElseThrow(() -> new ElementNichtVorhanden("Das Gesuchte Element ist nicht vorhanden"));
     }
     public TransactionElement updateElement(TransactionElement element){
-       // TransactionElement transactionElement = this.searchElement(element.getId());
 
         return repository.save(element);
     }

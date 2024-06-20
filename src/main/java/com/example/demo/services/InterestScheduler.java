@@ -20,9 +20,12 @@ public class InterestScheduler {
 
     TransactionService transactionService;
 
+    DebitorService debitorService;
+
     @Autowired  // eneables automatic dependecy injection by spring
-    public InterestScheduler(TransactionService transactionService){
+    public InterestScheduler(TransactionService transactionService, DebitorService debitorService){
     this.transactionService  = transactionService;
+    this.debitorService = debitorService;
     }
 
     private ScheduledExecutorService scheduler;
@@ -55,7 +58,8 @@ public class InterestScheduler {
                 System.out.println("not empty");
             for (TransactionElement t : transactionElements) {
 
-                long passedDays = ChronoUnit.DAYS.between(t.getInterestStartDate(), currentDate);
+                long passedDays = ChronoUnit.DAYS.between(t.getLastInterestDate(), currentDate);
+
                 long payDays = passedDays / t.getInterestFrequency();
 
                 // es müssen genausoviele tage vergangen sein wie interestFrequency
@@ -64,16 +68,19 @@ public class InterestScheduler {
 
                     double cAmount = t.getAmount();
                     double interest = cAmount * t.getInterestRate() / 100;
-                    //double newAmount = cAmount + interest;
-                    // t.setAmount(newAmount);
+
                     // zur Sicherheit, falls das Backend mal offline sein sollte,
                     for (int i = 1; i <= payDays; i++) {
                         cAmount = cAmount + interest;
 
                     }
+                    double addedInterest = cAmount - t.getAmount();
                     t.setAmount(cAmount);
-                    t.setLastInterstDate(currentDate);
+                    t.setLastInterestDate(currentDate);
+
                     transactionService.updateElement(t);
+                    debitorService.calculateDebtsForDebitor(t.getDebitorId(), addedInterest);
+
                 }
 
 
