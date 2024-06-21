@@ -3,6 +3,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 
 @Entity //gibt bekannt das, dass Element eine Jpa entity ist -> Repository
 
@@ -34,6 +35,8 @@ public class TransactionElement {
     @JsonIgnore
     private LocalDate lastInterestDate;
 
+    double futureInterest;
+
     // Konstruktor
     public TransactionElement(int id, int debitorId, String purpose, double amount, LocalDate borrowDate,
                               double interestRate, int interestFrequency, LocalDate interestStartDate, String notes) {
@@ -54,6 +57,26 @@ public class TransactionElement {
     public TransactionElement(){
 
     }
+
+    //Berechnet zukünftige Zinsen
+    public double calculateFutureInterest(int daysAhead) {
+        long passedDays = ChronoUnit.DAYS.between(lastInterestDate, LocalDate.now());
+        long totalDays = passedDays + daysAhead;
+        double futureAmount = amount;
+        double calculatedFutureInterest;
+
+        for (int i = 0; i < totalDays / interestFrequency; i++) {
+            futureAmount += futureAmount * (interestRate / 100);
+        }
+        //Aufpassen, derzeit wird es direkt in futureInterest gespeichert,
+        //das heist wenn ich es nur so mit nem anderen Zeitraum ausrechnen will wird es in transactionElement trozdem überschrieben!
+        //-> Dementsprechend habe ich mich Entschieden das Ergebnis zu kapseln, muss jetzt übern setter eingetragen werden.
+        calculatedFutureInterest = futureAmount - amount; // Berechnung der zukünftigen Zinsen und KEINE Speichern im Feld
+        return calculatedFutureInterest;
+    }
+
+
+
 
     // Getter und Setter
     public int getId() {
@@ -153,6 +176,14 @@ public class TransactionElement {
 
     public void setLastInterestDate(LocalDate lastInterestDate) {
         this.lastInterestDate = lastInterestDate;
+    }
+
+    public double getFutureInterest() {
+        return futureInterest;
+    }
+
+    public void setFutureInterest(double futureInterest) {
+        this.futureInterest = futureInterest;
     }
 }
 

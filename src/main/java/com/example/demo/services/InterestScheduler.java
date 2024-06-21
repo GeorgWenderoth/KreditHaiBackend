@@ -78,11 +78,15 @@ public class InterestScheduler {
                     t.setAmount(cAmount);
                     t.setLastInterestDate(currentDate);
 
-                    transactionService.updateElement(t);
+                    //sollte ich nicht mehr brauchen, und sollte funktionieren da calculateDebtsForDebitor unabhängig davon funktioniert ob transactionElement geupdated wird
+                    // transactionService.updateElement(t);
                     debitorService.calculateDebtsForDebitor(t.getDebitorId(), addedInterest);
 
                 }
 
+                double futureInterest = t.calculateFutureInterest(7);
+                t.setFutureInterest(futureInterest);
+                transactionService.updateElement(t);
 
             }
         }
