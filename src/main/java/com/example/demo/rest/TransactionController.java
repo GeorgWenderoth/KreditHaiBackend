@@ -51,4 +51,7 @@ public class TransactionController {
         return new ResponseEntity<>(service.getTransactionElementsByDebitorId(debitorId), HttpStatus.OK);
     }
 
+
+
+
 }
