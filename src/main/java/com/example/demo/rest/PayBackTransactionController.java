@@ -52,13 +52,15 @@ public class PayBackTransactionController {
     @CrossOrigin
     @GetMapping("/smartpay")
     public ResponseEntity<?> calculateSmartPay() {
-        // Implementiere hier den Smart-Pay-Algorithmus
-
-         List<TransactionElement> transactionElementList =  smartPay.smartPayAlgorytmus(7);
-        // Sortiere oder berechne die priorisierten Transaktionen
-
-
-        // Gib die berechneten Transaktionen zurück
+         List<TransactionElement> transactionElementList =  smartPay.sortTransactionsByFutureInterest(7);
         return ResponseEntity.ok(transactionElementList);
     }
+
+    @CrossOrigin
+    @PostMapping("/smartPayBack")
+    public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney) {
+        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney);
+        return ResponseEntity.ok(updatedTransactions);
+    }
+
 }

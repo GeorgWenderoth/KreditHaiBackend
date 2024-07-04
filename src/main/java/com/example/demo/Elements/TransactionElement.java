@@ -59,7 +59,7 @@ public class TransactionElement {
     }
 
     //Berechnet zukünftige Zinsen
-    public double calculateFutureInterest(int daysAhead) {
+     public double calculateFutureInterest(int daysAhead) {
         long passedDays = ChronoUnit.DAYS.between(lastInterestDate, LocalDate.now());
         long totalDays = passedDays + daysAhead;
         double futureAmount = amount;
@@ -68,9 +68,9 @@ public class TransactionElement {
         for (int i = 0; i < totalDays / interestFrequency; i++) {
             futureAmount += futureAmount * (interestRate / 100);
         }
-        //Aufpassen, derzeit wird es direkt in futureInterest gespeichert,
-        //das heist wenn ich es nur so mit nem anderen Zeitraum ausrechnen will wird es in transactionElement trozdem überschrieben!
-        //-> Dementsprechend habe ich mich Entschieden das Ergebnis zu kapseln, muss jetzt übern setter eingetragen werden.
+
+         // Um calculateFutureInteresst unabhängig benutzen zu können ohne futureInterest zu überschreiben
+        // habe ich mich Entschieden das Ergebnis zu kapseln, muss jetzt übern setter eingetragen werden.
         calculatedFutureInterest = futureAmount - amount; // Berechnung der zukünftigen Zinsen und KEINE Speichern im Feld
         return calculatedFutureInterest;
     }
