@@ -52,14 +52,14 @@ public class PayBackTransactionController {
     @CrossOrigin
     @GetMapping("/smartpay")
     public ResponseEntity<?> calculateSmartPay() {
-         List<TransactionElement> transactionElementList =  smartPay.sortTransactionsByFutureInterest(7);
+         List<TransactionElement> transactionElementList =  smartPay.getTransactionSortedByFutureInterest(7);
         return ResponseEntity.ok(transactionElementList);
     }
 
     @CrossOrigin
     @PostMapping("/smartPayBack")
-    public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney) {
-        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney);
+    public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney, @RequestParam(required = false) Integer debitorId) {
+        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney, debitorId);
         return ResponseEntity.ok(updatedTransactions);
     }
 
