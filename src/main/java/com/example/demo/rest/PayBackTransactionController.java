@@ -63,4 +63,11 @@ public class PayBackTransactionController {
         return ResponseEntity.ok(updatedTransactions);
     }
 
+    @CrossOrigin
+    @PostMapping("/smartPositivePayBack")
+    public ResponseEntity<?> smartPayBackPositive(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney, @RequestParam(required = false) Integer debitorId) {
+        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmusPositiv(days, payBackMoney, debitorId);
+        return ResponseEntity.ok(updatedTransactions);
+    }
+
 }
