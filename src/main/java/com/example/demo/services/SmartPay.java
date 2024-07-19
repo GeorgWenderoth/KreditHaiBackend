@@ -113,18 +113,16 @@ public class SmartPay  {
                     double amount = transactionElement.getAmount();
                     double result = amount + cPayBackMoney;
 
-                    //wenn ergebniss kleiner gleich null ist, also wenn  nicht mehr genug Geld das ist um diese transaction vollständig zurückzuzahlen
+                    //wenn ergebniss kleiner gleich null ist, wenn also nicht mehr genug Geld, oder gerade genug geld da ist um diese transaction vollständig zurückzuzahlen
                     if (result <= 0) {
                         transactionElement.setAmount(result);
                         transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
-
-
                         updatedTransactionElements.add( transactionElement);
-                        // hier muss n break oder so, es dar ja net weiter iteriert werden sonst wird doppelt abgezogen!
-                        //aber ist das die eleganteste Lösung? Clean code?, so besser?
-                        // break;
+
                         cPayBackMoney = 0.00;
+                        break;
                     } else {
+                        //wenn das ergebniss größer als 0 ist also Geld da ist um auch noch was von der nächsten transaction abzuzahlen
                         transactionElement.setAmount(0);
                         transactionElement.setFutureInterest(0);
                         updatedTransactionElements.add(transactionElement);
@@ -136,6 +134,10 @@ public class SmartPay  {
                 }
             }
 
+            //Kleiner gleich damit nicht zu viel geld bezahlt werden kann, bz geld das über schulden hinaus geht. Und verhindert wird das positive transactionen, aufaddiert werden.
+            //wobei man sich den overflow auch zu nutze machen könte, in dem eben neue transactionen angelegt werden, aber dafür währe else zuständig
+        //Sollte sortedTransaction vielleicht abgeschnitten werden? bz eine Überprüfung ob die transaction auch negativ sind?
+        //schutz gegen overflow,
         if( cPayBackMoney <= 0.00) {
             for( TransactionElement updatedTransactionElement: updatedTransactionElements) {
                 transactionService.updateElement( updatedTransactionElement);
@@ -151,7 +153,7 @@ public class SmartPay  {
         return updatedTransactionElements;
     }
 
-    // einVersuch eine Methode für positive und negative abzahlungen  zu machen
+    // einVersuch eine Methode für positive und negative abzahlungen zu machen
     public List<TransactionElement> payOfPrioritisedDeptsForBoth(List<TransactionElement> sortedTransactions, double payBackMoney){
         double cPayBackMoney = payBackMoney;
         // ich muss erstmal schauen ob die Gesammtschulden überhaupt so hoch sind wie payBackMoney! bz was mache ich dann?
@@ -166,18 +168,15 @@ public class SmartPay  {
                 double amount = transactionElement.getAmount();
                 double result = amount + cPayBackMoney;
 
-                //wenn ergebniss kleiner gleich null ist und  payback money negative ist oder wenn ergebniss größer als null ist und paybackmoney größer als null ist
-                // , also wenn  nicht mehr genug Geld das ist um diese transaction vollständig zurückzuzahlen
-                //
-                if (result <= 0 && payBackMoney <0.00 || result >= 0 && payBackMoney >0.00) {
+                //wenn ergebniss kleiner gleich 0 ist und  payBackMoney negative ist oder wenn ergebniss größer als 0 ist und payBackMoney größer als 0 ist
+                // also wenn  nicht mehr genug Geld das ist um diese transaction vollständig zurückzuzahlen
+                //  NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+                if (result <= 0 && payBackMoney >0.00 || result >= 0 && payBackMoney < 0.00) {
                     transactionElement.setAmount(result);
                     transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
 
 
                     updatedTransactionElements.add( transactionElement);
-                    // hier muss n break oder so, es dar ja net weiter iteriert werden sonst wird doppelt abgezogen!
-                    //aber ist das die eleganteste Lösung? Clean code?, so besser?
-                    // break;
                     cPayBackMoney = 0.00;
                     break;
                 } else {
@@ -192,7 +191,10 @@ public class SmartPay  {
             }
         }
 
-        if( cPayBackMoney <=  0.00 && payBackMoney <0.00 || cPayBackMoney >=  0.00 && payBackMoney >0.00 ) {
+        // warum funktionier der overflow schutz hier nicht?
+        // für positive transaction
+        //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+        if( payBackMoney > 0.00 && cPayBackMoney <=  0.00   || payBackMoney < 0.00 && cPayBackMoney >=  0.00) {
             for( TransactionElement updatedTransactionElement: updatedTransactionElements) {
                 transactionService.updateElement( updatedTransactionElement);
             };
@@ -203,7 +205,7 @@ public class SmartPay  {
             //oder einfach Fehler?
         }
 
-
+        // was soll es returnen, wenn  die if fehlschläft, der betrag zu groß netagtiv / positive ist und es zum overflow kommt?
         return updatedTransactionElements;
     }
 
