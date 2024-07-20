@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -58,8 +59,9 @@ public class PayBackTransactionController {
 
     @CrossOrigin
     @PostMapping("/smartPayBack")
-    public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney, @RequestParam(required = false) Integer debitorId) {
-        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney, debitorId);
+    public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney,
+                                          @RequestParam(required = false) Integer debitorId, @RequestParam(required = false) String notes ) {
+        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney, debitorId, notes);
         return ResponseEntity.ok(updatedTransactions);
     }
 

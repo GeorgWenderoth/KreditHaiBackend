@@ -4,7 +4,6 @@ import com.example.demo.Elements.PayBackTransactionElement;
 import com.example.demo.Elements.TransactionElement;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.Null;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,40 +21,22 @@ public class SmartPay {
         this.payBackTransactionService = payBackTransactionService;
     }
 
-   /* public List<TransactionElement> smartPayAlgorytmus(int days, double payBackMoney, Integer debitorId){
-        List<TransactionElement> sortedTransactions;
-        if(debitorId != null){
-            sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getTransactionElementsByDebitorId(debitorId));
-        } else {
-            sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
-        }
-       // List<TransactionElement> sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
-        List<TransactionElement> updatedTransactions =payOfPrioritisedDepts(sortedTransactions, payBackMoney);
 
-      return updatedTransactions;
-    };*/
-
-
-    public List<TransactionElement> smartPayAlgorytmus(int days, double payBackMoney, Integer debitorId) {
+    public List<TransactionElement> smartPayAlgorytmus(int days, double payBackMoney, Integer debitorId, String notes) {
         List<TransactionElement> sortedTransactions;
 
         if (payBackMoney < 0 || payBackMoney > 0) {
-
-
             if (debitorId != null) {
-
-
                 sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getTransactionElementsByDebitorId(debitorId));
                 if (payBackMoney < 0) {
                     Collections.reverse(sortedTransactions);
-
                 }
 
             } else {
                 sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
             }
 
-            List<TransactionElement> updatedTransactions = payOfPrioritisedDeptsForBoth(sortedTransactions, payBackMoney);
+            List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
 
             return updatedTransactions;
         } else {
@@ -63,8 +44,6 @@ public class SmartPay {
             return null;
         }
     }
-
-    ;
 
 
     public List<TransactionElement> smartPayAlgorytmusPositiv(int days, double payBackMoney, Integer debitorId) {
@@ -82,33 +61,100 @@ public class SmartPay {
         return updatedTransactions;
     }
 
-    ;
-
     public List<TransactionElement> getTransactionSortedByFutureInterest(int days) {
         return sortTransactionsByFutureInterest(days, transactionService.getElements());
     }
 
-    public List<TransactionElement> smartPayBackForDebitor(int days, double payBackMoney, int debitorId) {
 
-        List<TransactionElement> sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getTransactionElementsByDebitorId(debitorId));
-        List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney);
-
-        return updatedTransactions;
-    }
-
-    ;
 
 
     //Sollen noch andere faktoren die Liste Bestimmen?
     public List<TransactionElement> sortTransactionsByFutureInterest(int days, List<TransactionElement> transactionElementList) {
 
-        Collections.sort(transactionElementList,
-                Comparator.comparingDouble(transactionElement -> transactionElement.calculateFutureInterest(days)));
+        Collections.sort(transactionElementList, Comparator.comparingDouble(transactionElement -> transactionElement.calculateFutureInterest(days)));
 
         return transactionElementList;
     }
 
-    public List<TransactionElement> payOfPrioritisedDepts(List<TransactionElement> sortedTransactions, double payBackMoney) {
+
+    //für positive und negative Rückzahlungen
+    public List<TransactionElement> payOfPrioritisedDepts(List<TransactionElement> sortedTransactions, double payBackMoney, String notes) {
+        double cPayBackMoney = payBackMoney;
+
+        List<TransactionElement> updatedTransactionElements = new ArrayList<>();
+        List<PayBackTransactionElement> payBackTransactions = new ArrayList<>();
+        int payBackCounter = 0;
+
+        for (TransactionElement transactionElement : sortedTransactions) {
+
+            if (cPayBackMoney == 0.00) {
+                break;
+            }
+            // am anfang definieren?
+            double amount = transactionElement.getAmount();
+            double result = amount + cPayBackMoney;
+            LocalDate today = LocalDate.now();
+
+            //wenn Ergebniss kleiner gleich 0 ist und payBackMoney positive ist oder wenn Ergebniss größer gleich 0 ist und payBackMoney negative ist
+            // also wenn gerade genug Geld da ist um diese transaction zum Teil oder ganz abzuzahlen, aber micht mehr
+            //  NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+            if (result <= 0 && payBackMoney > 0.00 || result >= 0 && payBackMoney < 0.00) {
+
+                payBackCounter++;
+                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0, transactionElement.getId(), transactionElement.getDebitorId(),
+                        //cPayBack weil das ja der betrag war der zurückgezahlt wurde.
+                        cPayBackMoney, today, notes + " " + payBackCounter);
+
+                transactionElement.setAmount(result);
+                transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
+
+                payBackTransactions.add(payBackTransactionElement);
+                updatedTransactionElements.add(transactionElement);
+
+                cPayBackMoney = 0.00;
+                break;
+            } else {
+                payBackCounter++;
+                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0, transactionElement.getId(), transactionElement.getDebitorId(), transactionElement.getAmount() * -1, today, notes + " " + payBackCounter);
+
+                transactionElement.setAmount(0);
+                transactionElement.setFutureInterest(0);
+
+                payBackTransactions.add(payBackTransactionElement);
+                updatedTransactionElements.add(transactionElement);
+                cPayBackMoney = result;
+            }
+
+
+        }
+
+        //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+        if (cPayBackMoney <= 0.00 && payBackMoney > 0.00 || cPayBackMoney >= 0.00 && payBackMoney < 0.00) {
+            for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
+                transactionService.updateElement(updatedTransactionElement);
+
+            }
+
+            for (PayBackTransactionElement payBackTransactionElement : payBackTransactions) {
+                payBackTransactionService.createElement(payBackTransactionElement);
+                /// debitorService.calculateDebtsForDebitor(...) muss noch aufgerufen werden irgendwie /
+                // debitorDept muss geupdated werden, generell neustrukturieren???
+            }
+
+            return updatedTransactionElements;
+        } else {
+            // was tuhen,
+            // anfrage zurück?
+            //oder einfach Fehler?
+            // was soll es returnen, wenn die if fehlschlägt, der betrag zu groß negativ / positive ist und es zum overflow kommt?
+            List<TransactionElement> emptyList = new ArrayList<>();
+            return emptyList;
+        }
+    }
+
+
+
+    public List<TransactionElement> payOfPrioritisedNegativeDepts(List<TransactionElement> sortedTransactions, double payBackMoney) {
         double cPayBackMoney = payBackMoney;
         // ich muss erstmal schauen ob die Gesammtschulden überhaupt so hoch sind wie payBackMoney! bz was mache ich dann?
 
@@ -139,8 +185,6 @@ public class SmartPay {
                 updatedTransactionElements.add(transactionElement);
                 cPayBackMoney = result;
             }
-
-
         }
 
         //Kleiner gleich damit nicht zu viel geld bezahlt werden kann, bz geld das über schulden hinaus geht. Und verhindert wird das positive transactionen, aufaddiert werden.
@@ -160,87 +204,6 @@ public class SmartPay {
         }
 
 
-        return updatedTransactionElements;
-    }
-
-    // einVersuch eine Methode für positive und negative abzahlungen zu machen
-    public List<TransactionElement> payOfPrioritisedDeptsForBoth(List<TransactionElement> sortedTransactions, double payBackMoney) {
-        double cPayBackMoney = payBackMoney;
-        // ich muss erstmal schauen ob die Gesammtschulden überhaupt so hoch sind wie payBackMoney! bz was mache ich dann?
-
-        List<TransactionElement> updatedTransactionElements = new ArrayList<>();
-        List<PayBackTransactionElement> payBackTransactions = new ArrayList<>();
-
-        for (TransactionElement transactionElement : sortedTransactions) {
-
-
-            if (cPayBackMoney == 0.00) {
-                break;
-            }
-            // am anfang definieren?
-            double amount = transactionElement.getAmount();
-            double result = amount + cPayBackMoney;
-            LocalDate today = LocalDate.now();
-
-
-            //wenn Ergebniss kleiner gleich 0 ist und payBackMoney positive ist oder wenn Ergebniss größer als 0 ist und payBackMoney negative ist
-            // also wenn  nicht mehr genug Geld das ist um diese transaction vollständig zurückzuzahlen
-            //  NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
-            if (result <= 0 && payBackMoney > 0.00 || result >= 0 && payBackMoney < 0.00) {
-
-
-                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0,transactionElement.getId(),transactionElement.getDebitorId(),
-                      //cPayBack weil das ja der betrag war der zurückgezahlt wurde.
-                        cPayBackMoney, today,"");
-
-                transactionElement.setAmount(result);
-                transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
-
-
-                payBackTransactions.add(payBackTransactionElement);
-                updatedTransactionElements.add(transactionElement);
-
-                cPayBackMoney = 0.00;
-                break;
-            } else {
-                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0,transactionElement.getId(),transactionElement.getDebitorId(),
-                        transactionElement.getAmount()*-1, today,"");
-
-                transactionElement.setAmount(0);
-                transactionElement.setFutureInterest(0);
-
-                payBackTransactions.add(payBackTransactionElement);
-                updatedTransactionElements.add(transactionElement);
-                cPayBackMoney = result;
-            }
-
-
-        }
-
-
-
-        //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
-        if (cPayBackMoney <= 0.00 && payBackMoney > 0.00  || cPayBackMoney >= 0.00 && payBackMoney < 0.00) {
-            for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
-                transactionService.updateElement(updatedTransactionElement);
-
-            }
-
-            for (PayBackTransactionElement payBackTransactionElement: payBackTransactions) {
-                payBackTransactionService.createElement(payBackTransactionElement);
-                /// debitorService.calculateDebtsForDebitor(...) muss noch aufgerufen werden irgendwie /
-                // debitorDept muss geupdated werden, generell neustrukturieren???
-            }
-
-            return updatedTransactionElements;
-        } else {
-            // was tuhen,
-            // anfrage zurück?
-            //oder einfach Fehler?
-
-        }
-
-        // was soll es returnen, wenn die if fehlschlägt, der betrag zu groß negativ / positive ist und es zum overflow kommt?
         return updatedTransactionElements;
     }
 
@@ -285,8 +248,17 @@ public class SmartPay {
             transactionService.updateElement(updatedTransactionElement);
 
         }
-        ;
+
         return updatedTransactionElements;
+    }
+
+
+    public List<TransactionElement> smartPayBackForDebitor(int days, double payBackMoney, int debitorId) {
+
+        List<TransactionElement> sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getTransactionElementsByDebitorId(debitorId));
+        List<TransactionElement> updatedTransactions = payOfPrioritisedNegativeDepts(sortedTransactions, payBackMoney);
+
+        return updatedTransactions;
     }
 
 }
