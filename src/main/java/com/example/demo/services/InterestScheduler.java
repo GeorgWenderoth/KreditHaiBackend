@@ -60,34 +60,41 @@ public class InterestScheduler {
 
                 long passedDays = ChronoUnit.DAYS.between(t.getLastInterestDate(), currentDate);
 
-                long payDays = passedDays / t.getInterestFrequency();
+                //20.07.24, error cant devide by zero (/ by zero), ne if?
+                // Passiert wohl wenn keine interest frequency gesetzt ist? aber scheinbar nur wenn eine neue payBacktransaction angleget werden soll??? warum?
+                //lösung? soll noch <=0 ?, macht teile der anderen if überflüssigß
+                //wenn nicht 0
+                if(t.getInterestFrequency() > 0) {
 
-                // es müssen genausoviele tage vergangen sein wie interestFrequency
-                if (passedDays >= t.getInterestFrequency() && t.getInterestFrequency() > 0) {
-                    System.out.println("if");
+                    long payDays = passedDays / t.getInterestFrequency();
 
-                    double cAmount = t.getAmount();
-                    double interest = cAmount * t.getInterestRate() / 100;
+                    // es müssen genausoviele tage vergangen sein wie interestFrequency ,
+                    // && t.getInterestFrequency() > 0
+                    if (passedDays >= t.getInterestFrequency() ) {
+                        System.out.println("if");
 
-                    // zur Sicherheit, falls das Backend mal offline sein sollte,
-                    for (int i = 1; i <= payDays; i++) {
-                        cAmount = cAmount + interest;
+                        double cAmount = t.getAmount();
+                        double interest = cAmount * t.getInterestRate() / 100;
+
+                        // zur Sicherheit, falls das Backend mal offline sein sollte,
+                        for (int i = 1; i <= payDays; i++) {
+                            cAmount = cAmount + interest;
+
+                        }
+                        double addedInterest = cAmount - t.getAmount();
+                        t.setAmount(cAmount);
+                        t.setLastInterestDate(currentDate);
+
+                        //sollte ich nicht mehr brauchen, und sollte funktionieren da calculateDebtsForDebitor unabhängig davon funktioniert ob transactionElement geupdated wird
+                        // transactionService.updateElement(t);
+                        debitorService.calculateDebtsForDebitor(t.getDebitorId(), addedInterest);
 
                     }
-                    double addedInterest = cAmount - t.getAmount();
-                    t.setAmount(cAmount);
-                    t.setLastInterestDate(currentDate);
 
-                    //sollte ich nicht mehr brauchen, und sollte funktionieren da calculateDebtsForDebitor unabhängig davon funktioniert ob transactionElement geupdated wird
-                    // transactionService.updateElement(t);
-                    debitorService.calculateDebtsForDebitor(t.getDebitorId(), addedInterest);
-
+                    double futureInterest = t.calculateFutureInterest(7);
+                    t.setFutureInterest(futureInterest);
+                    transactionService.updateElement(t);
                 }
-
-                double futureInterest = t.calculateFutureInterest(7);
-                t.setFutureInterest(futureInterest);
-                transactionService.updateElement(t);
-
             }
         }
 

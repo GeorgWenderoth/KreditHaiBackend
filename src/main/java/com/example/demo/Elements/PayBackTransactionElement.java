@@ -2,6 +2,7 @@ package com.example.demo.Elements;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -30,11 +31,11 @@ public class PayBackTransactionElement {
 
     private double amount;
 
-    private Date payBackDate;
+    private LocalDate payBackDate;
 
     private String notes;
 
-    public PayBackTransactionElement(int id, int transactionId, int debitorId, double amount, Date payBackDate, String notes) {
+    public PayBackTransactionElement(int id, int transactionId, int debitorId, double amount, LocalDate payBackDate, String notes) {
         this.id = id;
         this.transactionId = transactionId;
         this.debitorId = debitorId;
@@ -78,11 +79,11 @@ public class PayBackTransactionElement {
         this.amount = amount;
     }
 
-    public Date getPayBackDate() {
+    public LocalDate getPayBackDate() {
         return payBackDate;
     }
 
-    public void setPayBackDate(Date payBackDate) {
+    public void setPayBackDate(LocalDate payBackDate) {
         this.payBackDate = payBackDate;
     }
 

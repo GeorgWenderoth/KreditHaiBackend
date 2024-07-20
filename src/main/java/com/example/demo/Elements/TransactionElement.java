@@ -65,6 +65,11 @@ public class TransactionElement {
         double futureAmount = amount;
         double calculatedFutureInterest;
 
+        //Preventing java.lang.ArithmeticException: / by zero
+        if(interestFrequency == 0 || interestRate == 0.00){
+            return 0.00;
+        }
+
         for (int i = 0; i < totalDays / interestFrequency; i++) {
             futureAmount += futureAmount * (interestRate / 100);
         }
