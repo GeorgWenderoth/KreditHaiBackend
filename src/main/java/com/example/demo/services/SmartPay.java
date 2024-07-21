@@ -50,12 +50,10 @@ public class SmartPay {
         List<TransactionElement> sortedTransactions;
         if (debitorId != null) {
             sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getTransactionElementsByDebitorId(debitorId));
-
         } else {
             sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
         }
         Collections.reverse(sortedTransactions);
-        // List<TransactionElement> sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
         List<TransactionElement> updatedTransactions = payOfPrioritisedPositiveDepts(sortedTransactions, payBackMoney);
 
         return updatedTransactions;
@@ -64,8 +62,6 @@ public class SmartPay {
     public List<TransactionElement> getTransactionSortedByFutureInterest(int days) {
         return sortTransactionsByFutureInterest(days, transactionService.getElements());
     }
-
-
 
 
     //Sollen noch andere faktoren die Liste Bestimmen?
@@ -146,12 +142,11 @@ public class SmartPay {
             // was tuhen,
             // anfrage zurück?
             //oder einfach Fehler?
-            // was soll es returnen, wenn die if fehlschlägt, der betrag zu groß negativ / positive ist und es zum overflow kommt?
+            // was soll es returnen, wenn die if fehlschlägt, der Betrag zu groß negativ / positive ist und es zum overflow kommt?
             List<TransactionElement> emptyList = new ArrayList<>();
             return emptyList;
         }
     }
-
 
 
     public List<TransactionElement> payOfPrioritisedNegativeDepts(List<TransactionElement> sortedTransactions, double payBackMoney) {
@@ -175,7 +170,6 @@ public class SmartPay {
                 transactionElement.setAmount(result);
                 transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
                 updatedTransactionElements.add(transactionElement);
-
                 cPayBackMoney = 0.00;
                 break;
             } else {
@@ -215,33 +209,29 @@ public class SmartPay {
         List<TransactionElement> updatedTransactionElements = new ArrayList<>();
 
         for (TransactionElement transactionElement : sortedTransactions) {
-            if (cPayBackMoney != 0.00) {
-
-                // am anfang definieren?
-                double amount = transactionElement.getAmount();
-                double result = amount + cPayBackMoney;
-
-                if (result >= 0) {
-                    transactionElement.setAmount(result);
-                    transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
-
-
-                    updatedTransactionElements.add(transactionElement);
-                    // hier muss n break oder so, es dar ja net weiter iteriert werden sonst wird doppelt abgezogen!
-                    //aber ist das die eleganteste Lösung? Clean code?, so besser?
-                    // break;
-                    //hä wp macht das sinn? warum null? muss es nicht das ergebniss sein?
-                    cPayBackMoney = 0.00;
-                } else {
-                    transactionElement.setAmount(0);
-                    transactionElement.setFutureInterest(0);
-                    updatedTransactionElements.add(transactionElement);
-                    cPayBackMoney = result;
-                }
-
-            } else {
+            if (cPayBackMoney == 0.00) {
                 break;
             }
+
+            // am anfang definieren?
+            double amount = transactionElement.getAmount();
+            double result = amount + cPayBackMoney;
+
+            if (result >= 0) {
+                transactionElement.setAmount(result);
+                transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
+                updatedTransactionElements.add(transactionElement);
+
+                cPayBackMoney = 0.00;
+                break;
+            } else {
+                transactionElement.setAmount(0);
+                transactionElement.setFutureInterest(0);
+                updatedTransactionElements.add(transactionElement);
+                cPayBackMoney = result;
+            }
+
+
         }
 
         for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
