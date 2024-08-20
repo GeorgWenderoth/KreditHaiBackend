@@ -7,6 +7,7 @@ import com.example.demo.Elements.TransactionElement;
 import com.example.demo.services.DebitorService;
 import com.example.demo.services.PayBackTransactionService;
 import com.example.demo.services.SmartPay;
+import com.example.demo.services.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,12 +23,15 @@ public class PayBackTransactionController {
     public PayBackTransactionService service;
     private final DebitorService debitorService;
 
+    private final TransactionService transactionService;
+
     private SmartPay smartPay;
 
-    public PayBackTransactionController(PayBackTransactionService payBackTransactionService, DebitorService debitorService, SmartPay smartPay){
+    public PayBackTransactionController(PayBackTransactionService payBackTransactionService, DebitorService debitorService, SmartPay smartPay, TransactionService transactionService){
         this.service = payBackTransactionService;
         this.debitorService = debitorService;
         this.smartPay = smartPay;
+        this.transactionService = transactionService;
     }
 
     @CrossOrigin
@@ -35,6 +39,7 @@ public class PayBackTransactionController {
     public ResponseEntity<PayBackTransactionElement> newPayBackTransaction(@RequestBody PayBackTransactionElement element){
         final PayBackTransactionElement payBackTransactionElement = service.createElement(element);
         debitorService.calculateDebtsForDebitor(payBackTransactionElement.getDebitorId(), payBackTransactionElement.getAmount());
+        transactionService.caluclateTransactionAmount(payBackTransactionElement.getTransactionId(), payBackTransactionElement.getAmount());
         return  new ResponseEntity<>(payBackTransactionElement, HttpStatus.CREATED); // Warum nochmal returnen
     }
 

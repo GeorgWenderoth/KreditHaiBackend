@@ -46,6 +46,12 @@ public class TransactionService {
         return repository.findAllByDebitorId(debitorId);
     }
 
+    public void caluclateTransactionAmount(int transactionId, double amount ){
+        TransactionElement element = searchElement(transactionId);
+        element.setAmount(element.getAmount()+ amount);
+        repository.save(element);
+    }
+
 
 
 }
