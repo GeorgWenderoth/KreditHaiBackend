@@ -66,8 +66,14 @@ public class PayBackTransactionController {
     @PostMapping("/smartPayBack")
     public ResponseEntity<?> smartPayBack(@RequestParam(defaultValue = "7")  int days, @RequestParam double payBackMoney,
                                           @RequestParam(required = false) Integer debitorId, @RequestParam(required = false) String notes ) {
-        List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney, debitorId, notes);
-        return ResponseEntity.ok(updatedTransactions);
+        //added try catch coz of exception 16.09
+        try {
+            List<TransactionElement> updatedTransactions = smartPay.smartPayAlgorytmus(days, payBackMoney, debitorId, notes);
+            return ResponseEntity.ok(updatedTransactions);
+        } catch (ExcessPaymentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
 
     @CrossOrigin

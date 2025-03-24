@@ -2,6 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.Elements.PayBackTransactionElement;
 import com.example.demo.Elements.TransactionElement;
+import com.example.demo.rest.ElementNichtVorhanden;
+import com.example.demo.rest.ExcessPaymentException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -35,10 +37,11 @@ public class SmartPay {
             } else {
                 sortedTransactions = sortTransactionsByFutureInterest(days, transactionService.getElements());
             }
+            //test, damit ich  wegen der exeption die ich im valle einer überzahltung werfe keine probleme kriege? 16.09, ist aber egal glaube ich
+            /*List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
 
-            List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
-
-            return updatedTransactions;
+            return updatedTransactions; */
+            return  payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
         } else {
             //wenn payBackMoney = 0, dann was machen?, oder soll das vorher ausgeschlossen sein?
             return null;
@@ -143,8 +146,10 @@ public class SmartPay {
             // anfrage zurück?
             //oder einfach Fehler?
             // was soll es returnen, wenn die if fehlschlägt, der Betrag zu groß negativ / positive ist und es zum overflow kommt?
-            List<TransactionElement> emptyList = new ArrayList<>();
-            return emptyList;
+            //Commented out below to try out trow new ElementNichtVorhanden
+           // List<TransactionElement> emptyList = new ArrayList<>();
+           // return emptyList;
+            throw new ExcessPaymentException("Rückzahltung zu viel");
         }
     }
 
