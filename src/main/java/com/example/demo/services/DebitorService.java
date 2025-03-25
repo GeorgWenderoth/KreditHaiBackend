@@ -43,15 +43,13 @@ public class DebitorService {
             debitorElement = optionalDebitor.get();
             double newAmount = debitorElement.getAmount() + amount;
             debitorElement.setAmount(newAmount);
-
             repository.save(debitorElement);
 
         } else {
             // Hier den Fall behandeln, das kein Debitor-Element gefunden wurde
+           // throw new Exception("DebitorElement wasnt found!");
+            System.out.println("DebitorElement wasnt found!");
         }
-
-
-
 
     }
 }

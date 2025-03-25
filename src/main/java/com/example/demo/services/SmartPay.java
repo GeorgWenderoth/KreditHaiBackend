@@ -18,9 +18,13 @@ public class SmartPay {
     TransactionService transactionService;
     PayBackTransactionService payBackTransactionService;
 
-    public SmartPay(TransactionService transactionService, PayBackTransactionService payBackTransactionService) {
+    // 25.03.25
+    DebitorService debitorService;
+
+    public SmartPay(TransactionService transactionService, PayBackTransactionService payBackTransactionService, DebitorService debitorService) {
         this.transactionService = transactionService;
         this.payBackTransactionService = payBackTransactionService;
+        this.debitorService = debitorService;
     }
 
 
@@ -41,7 +45,7 @@ public class SmartPay {
             /*List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
 
             return updatedTransactions; */
-            return  payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
+            return  payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes, debitorId);
         } else {
             //wenn payBackMoney = 0, dann was machen?, oder soll das vorher ausgeschlossen sein?
             return null;
@@ -77,7 +81,7 @@ public class SmartPay {
 
 
     //für positive und negative Rückzahlungen
-    public List<TransactionElement> payOfPrioritisedDepts(List<TransactionElement> sortedTransactions, double payBackMoney, String notes) {
+    public List<TransactionElement> payOfPrioritisedDepts(List<TransactionElement> sortedTransactions, double payBackMoney, String notes, Integer debitorId) {
         double cPayBackMoney = payBackMoney;
 
         List<TransactionElement> updatedTransactionElements = new ArrayList<>();
@@ -127,6 +131,7 @@ public class SmartPay {
 
         }
 
+        // Speichert die Änderungen einzeln ab (gäbe es hier noch en effizenteren weg? das direkt rein speicher? aber hätte halt viel fehler potenzial?
         //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
         if (cPayBackMoney <= 0.00 && payBackMoney > 0.00 || cPayBackMoney >= 0.00 && payBackMoney < 0.00) {
             for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
@@ -138,7 +143,10 @@ public class SmartPay {
                 payBackTransactionService.createElement(payBackTransactionElement);
                 /// debitorService.calculateDebtsForDebitor(...) muss noch aufgerufen werden irgendwie /
                 // debitorDept muss geupdated werden, generell neustrukturieren???
+
             }
+
+            debitorService.calculateDebtsForDebitor(debitorId, payBackMoney);
 
             return updatedTransactionElements;
         } else {
