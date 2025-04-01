@@ -5,6 +5,7 @@ import com.example.demo.repositorys.PayBackTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.Null;
 import java.util.List;
 
 @Service
@@ -22,6 +23,10 @@ public class PayBackTransactionService {
     }
 
     public PayBackTransactionElement createElement(PayBackTransactionElement element){
+        if ( Double.isNaN(element.getAmount())) {
+            throw new IllegalArgumentException("Ungültiger Betrag: " + element.getAmount());
+        }
+
         return repository.save(element);
     }
 
