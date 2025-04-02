@@ -37,7 +37,8 @@ public class PayBackTransactionController {
     @CrossOrigin
     @PostMapping("/neuePayBackTransaktion")
     public ResponseEntity<PayBackTransactionElement> newPayBackTransaction(@RequestBody PayBackTransactionElement element){
-        final PayBackTransactionElement payBackTransactionElement = service.createElement(element);
+        double tAmount = transactionService.getTransactionAmount(element.getTransactionId());
+        final PayBackTransactionElement payBackTransactionElement = service.createValidPayBackTansaction(element, tAmount );
         debitorService.calculateDebtsForDebitor(payBackTransactionElement.getDebitorId(), payBackTransactionElement.getAmount());
         transactionService.caluclateTransactionAmount(payBackTransactionElement.getTransactionId(), payBackTransactionElement.getAmount());
         return  new ResponseEntity<>(payBackTransactionElement, HttpStatus.CREATED); // Warum nochmal returnen

@@ -53,5 +53,11 @@ public class TransactionService {
     }
 
 
+    public double getTransactionAmount(int transactionId){
+        TransactionElement element = searchElement(transactionId);
+        return element.getAmount();
+    }
+
+
 
 }
