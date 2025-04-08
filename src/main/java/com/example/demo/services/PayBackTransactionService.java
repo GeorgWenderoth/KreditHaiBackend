@@ -2,8 +2,11 @@ package com.example.demo.services;
 
 import com.example.demo.Elements.PayBackTransactionElement;
 import com.example.demo.repositorys.PayBackTransactionRepository;
+import com.example.demo.rest.ExcessPaymentException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.constraints.Null;
 import java.util.List;
@@ -41,11 +44,15 @@ public class PayBackTransactionService {
         //warum <= 0 und net <0?
         //so? wir etwas lang?
 
-        //des muss ich nor irgenwie besser machen. mit beseren unterschiedlichen fehlermeldungen je nach fall? und im frontend verhindern
+        //des muss ich noch irgenwie besser machen. mit beseren unterschiedlichen fehlermeldungen je nach fall? und im frontend verhindern
         if(tAmount <= 0 && payBackAmount >= 0 && result <= 0 ||tAmount >= 0 && payBackAmount <= 0 && result >= 0){
             return createElement(pbElement);
         } else {
-            throw new IllegalArgumentException("Die Rückzahlung übersteigt die ausstehende Schuld.");
+            //throw new IllegalArgumentException("Die Rückzahlung übersteigt die ausstehende Schuld.");
+            /*throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST, "Die Rückzahlung übersteigt die ausstehende Schuld."
+            );*/
+            throw new ExcessPaymentException("Die Rückzahlung übersteigt die ausstehende Schuld.");
         }
 
     };

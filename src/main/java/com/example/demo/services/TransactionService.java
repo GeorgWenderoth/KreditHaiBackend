@@ -58,6 +58,4 @@ public class TransactionService {
         return element.getAmount();
     }
 
-
-
 }
