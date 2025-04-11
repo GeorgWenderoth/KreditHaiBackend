@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.Elements.PayBackTransactionElement;
 import com.example.demo.Elements.TransactionElement;
+import com.example.demo.Exceptions.DebtIncreasingPaymentException;
 import com.example.demo.rest.ElementNichtVorhanden;
 import com.example.demo.rest.ExcessPaymentException;
 import org.springframework.stereotype.Service;
@@ -45,7 +46,7 @@ public class SmartPay {
             /*List<TransactionElement> updatedTransactions = payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes);
 
             return updatedTransactions; */
-            return  payOfPrioritisedDepts(sortedTransactions, payBackMoney, notes, debitorId);
+            return  payOfPrioritisedDeptsExperiment(sortedTransactions, payBackMoney, notes, debitorId);
         } else {
             //wenn payBackMoney = 0, dann was machen?, oder soll das vorher ausgeschlossen sein?
             return null;
@@ -82,7 +83,7 @@ public class SmartPay {
 
     //für positive und negative Rückzahlungen
     public List<TransactionElement> payOfPrioritisedDepts(List<TransactionElement> sortedTransactions, double payBackMoney, String notes, Integer debitorId) {
-        double cPayBackMoney = payBackMoney;
+        double remainingPayBackMoney = payBackMoney;
 
         List<TransactionElement> updatedTransactionElements = new ArrayList<>();
         List<PayBackTransactionElement> payBackTransactions = new ArrayList<>();
@@ -90,12 +91,12 @@ public class SmartPay {
 
         for (TransactionElement transactionElement : sortedTransactions) {
 
-            if (cPayBackMoney == 0.00) {
+            if (remainingPayBackMoney == 0.00) {
                 break;
             }
             // am anfang definieren?
             double amount = transactionElement.getAmount();
-            double result = amount + cPayBackMoney;
+            double result = amount + remainingPayBackMoney;
             LocalDate today = LocalDate.now();
 
             //wenn Ergebniss kleiner gleich 0 ist und payBackMoney positive ist oder wenn Ergebniss größer gleich 0 ist und payBackMoney negative ist
@@ -106,7 +107,7 @@ public class SmartPay {
                 payBackCounter++;
                 PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0, transactionElement.getId(), transactionElement.getDebitorId(),
                         //cPayBack weil das ja der betrag war der zurückgezahlt wurde.
-                        cPayBackMoney, today, notes + " " + payBackCounter);
+                        remainingPayBackMoney, today, notes + " " + payBackCounter);
 
                 transactionElement.setAmount(result);
                 transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
@@ -114,7 +115,7 @@ public class SmartPay {
                 payBackTransactions.add(payBackTransactionElement);
                 updatedTransactionElements.add(transactionElement);
 
-                cPayBackMoney = 0.00;
+                remainingPayBackMoney = 0.00;
                 break;
             } else {
                 payBackCounter++;
@@ -125,7 +126,7 @@ public class SmartPay {
 
                 payBackTransactions.add(payBackTransactionElement);
                 updatedTransactionElements.add(transactionElement);
-                cPayBackMoney = result;
+                remainingPayBackMoney = result;
             }
 
 
@@ -133,7 +134,7 @@ public class SmartPay {
 
         // Speichert die Änderungen einzeln ab (gäbe es hier noch en effizenteren weg? das direkt rein speicher? aber hätte halt viel fehler potenzial?
         //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
-        if (cPayBackMoney <= 0.00 && payBackMoney > 0.00 || cPayBackMoney >= 0.00 && payBackMoney < 0.00) {
+        if (remainingPayBackMoney <= 0.00 && payBackMoney > 0.00 || remainingPayBackMoney >= 0.00 && payBackMoney < 0.00) {
             for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
                 transactionService.updateElement(updatedTransactionElement);
 
@@ -160,6 +161,117 @@ public class SmartPay {
             throw new ExcessPaymentException("Rückzahltung zu viel");
         }
     }
+
+
+
+
+    public List<TransactionElement> payOfPrioritisedDeptsExperiment(List<TransactionElement> sortedTransactions, double payBackMoney, String notes, Integer debitorId) {
+        double remainingPayBackMoney = payBackMoney;
+
+        List<TransactionElement> updatedTransactionElements = new ArrayList<>();
+        List<PayBackTransactionElement> payBackTransactions = new ArrayList<>();
+        int payBackCounter = 0;
+
+        for (TransactionElement transactionElement : sortedTransactions) {
+
+            if (remainingPayBackMoney == 0.00) {
+                break;
+            }
+            // am anfang definieren?
+            double schulden = transactionElement.getAmount();
+            double result = schulden + remainingPayBackMoney;
+            LocalDate today = LocalDate.now();
+
+            //wenn Ergebniss kleiner gleich 0 ist und payBackMoney positive ist oder wenn Ergebniss größer gleich 0 ist und payBackMoney negative ist
+            // also wenn gerade genug Geld da ist um diese transaction zum Teil oder ganz abzuzahlen, aber micht mehr
+            //  NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+            //if (result <= 0 && payBackMoney > 0.00 || result >= 0 && payBackMoney < 0.00) {
+            //wie sinnig ist das mit ry catch, wenn ich das hier eh nur als if  ersatz nehme und die unten nochmal werfe?
+            try {
+                // ne warte mal so geht das nicht, validate wird ja auch werfen wenn negativ bezahlt wurde
+                 payBackTransactionService.validatePayBackTansactionEXPERIMENT(remainingPayBackMoney, schulden, result);
+
+
+                payBackCounter++;
+
+                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0, transactionElement.getId(), transactionElement.getDebitorId(),
+                        //cPayBack weil das ja der betrag war der zurückgezahlt wurde.
+                        remainingPayBackMoney, today, notes + " " + payBackCounter);
+
+                transactionElement.setAmount(result);
+                transactionElement.setFutureInterest(transactionElement.calculateFutureInterest(7));
+
+                payBackTransactions.add(payBackTransactionElement);
+                updatedTransactionElements.add(transactionElement);
+
+                remainingPayBackMoney = 0.00;
+                break;
+                // } else {w
+            }catch(ExcessPaymentException e) {
+                payBackCounter++;
+                PayBackTransactionElement payBackTransactionElement = new PayBackTransactionElement(0, transactionElement.getId(), transactionElement.getDebitorId(), transactionElement.getAmount() * -1, today, notes + " " + payBackCounter);
+
+                transactionElement.setAmount(0);
+                transactionElement.setFutureInterest(0);
+
+                payBackTransactions.add(payBackTransactionElement);
+                updatedTransactionElements.add(transactionElement);
+                remainingPayBackMoney = result;
+            }catch(DebtIncreasingPaymentException err) {
+                System.out.println("Die Rückzahlung ist Invalid, da sie die ausstehende Schuld erhöht, oder nichts zurück zahlt");
+                throw new DebtIncreasingPaymentException("Die Rückzahlung ist Invalid, da sie die ausstehende Schuld erhöht, oder nichts zurück zahlt DebtIncreasingPaymentException");
+            };
+            //muss ich hier die DebtIncreasingPaymentException catchen? ne eigendlich net oder, also da ist ja dann ein tatsächlicher fehler.was machen?
+
+
+        }
+        /*
+        // positive schulden ->
+        if(payBackMoney < 0 && remainingPayBackMoney < 0  ||
+        // negative schulden ->
+           payBackMoney > 0 && remainingPayBackMoney > 0){
+            throw new ExcessPaymentException("Rückzahltung zu viel");
+        }
+        */
+
+        // Speichert die Änderungen einzeln ab (gäbe es hier noch en effizenteren weg? das direkt rein speicher? aber hätte halt viel fehler potenzial?
+        //NegativeTransaction=positivePayBack || PositiveTransaction=negativePayBack
+        //mach das hier überhaupt sinn?
+        //wenn das ürig gebliebene RückzahlungsGeld 0 oder - ist, && die organiale rückzahlungsMenge + ist
+        if (remainingPayBackMoney <= 0.00 && payBackMoney > 0.00
+        //wenn das ürig gebliebene RückzahlungsGeld 0 oder + ist, && die organiale rückzahlungsMenge - ist
+         || remainingPayBackMoney >= 0.00 && payBackMoney < 0.00) {
+            for (TransactionElement updatedTransactionElement : updatedTransactionElements) {
+                transactionService.updateElement(updatedTransactionElement);
+
+            }
+
+            for (PayBackTransactionElement payBackTransactionElement : payBackTransactions) {
+                payBackTransactionService.createElement(payBackTransactionElement);
+                /// debitorService.calculateDebtsForDebitor(...) muss noch aufgerufen werden irgendwie /
+                // debitorDept muss geupdated werden, generell neustrukturieren???
+
+            }
+
+            debitorService.calculateDebtsForDebitor(debitorId, payBackMoney);
+
+            return updatedTransactionElements;
+        } else {
+            // was tuhen,
+            // anfrage zurück?
+            //oder einfach Fehler?
+            // was soll es returnen, wenn die if fehlschlägt, der Betrag zu groß negativ / positive ist und es zum overflow kommt?
+            //Commented out below to try out trow new ElementNichtVorhanden
+            // List<TransactionElement> emptyList = new ArrayList<>();
+            // return emptyList;
+            throw new ExcessPaymentException("Rückzahltung zu viel");
+
+        }
+    }
+
+
+
+
 
 
     public List<TransactionElement> payOfPrioritisedNegativeDepts(List<TransactionElement> sortedTransactions, double payBackMoney) {
