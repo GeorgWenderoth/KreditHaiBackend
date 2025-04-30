@@ -46,7 +46,8 @@ public class PayBackTransactionService {
         //so? wir etwas lang?
 
         //des muss ich noch irgenwie besser machen. mit beseren unterschiedlichen fehlermeldungen je nach fall? und im frontend verhindern
-        if(tAmount <= 0 && payBackAmount >= 0 && result <= 0 ||tAmount >= 0 && payBackAmount <= 0 && result >= 0){
+        if(tAmount <= 0 && payBackAmount >= 0 && result <= 0 ||
+           tAmount >= 0 && payBackAmount <= 0 && result >= 0){
             return createElement(pbElement);
         } else {
 
@@ -54,6 +55,9 @@ public class PayBackTransactionService {
         }
 
     };
+
+
+
 
     public double validatePayBackTansaction(double payBackMoney, double tAmount){
 
@@ -63,7 +67,8 @@ public class PayBackTransactionService {
 
 
         //des muss ich noch irgenwie besser machen. mit beseren unterschiedlichen fehlermeldungen je nach fall? und im frontend verhindern
-        if(tAmount <= 0 && payBackMoney >= 0 && result <= 0 ||tAmount >= 0 && payBackMoney <= 0 && result >= 0){
+        if(tAmount <= 0 && payBackMoney >= 0 && result <= 0 ||
+           tAmount >= 0 && payBackMoney <= 0 && result >= 0){
                 return result;
         } else {
 
@@ -72,12 +77,28 @@ public class PayBackTransactionService {
     }
 
 
+    public PayBackTransactionElement createValidPayBackTansactionEXPERIMENT(PayBackTransactionElement pbElement, double tAmount){
+        double payBackAmount = pbElement.getAmount();
+        double result = tAmount + payBackAmount;
+        //warum <= 0 und net <0?
+        //so? wir etwas lang?
+
+        //des muss ich noch irgenwie besser machen. mit beseren unterschiedlichen fehlermeldungen je nach fall? und im frontend verhindern
+        try{
+            validatePayBackTansactionEXPERIMENT(payBackAmount, tAmount, result);
+            return createElement(pbElement);
+        } catch (DebtIncreasingPaymentException e){
+            throw new DebtIncreasingPaymentException("Die Rückzahlung ist Invalid, da sie die ausstehende Schuld erhöht, oder nichts zurück zahlt DebtIncreasingPaymentException:");
+
+        } catch (ExcessPaymentException e){
+            throw e;
+            //throw new ExcessPaymentException("Die Rückzahlung übersteigt die ausstehende Schuld. ExcessPaymentException:");
+        }
+
+    };
+
+
     public boolean validatePayBackTansactionEXPERIMENT(double payBackAmount, double transactionAmount, double result){
-
-
-
-
-
 
         //mit nem case?
 
