@@ -1,9 +1,6 @@
 package com.example.demo.Elements;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity //gibt bekannt das, dass Element eine Jpa entity ist -> Repository
 
@@ -13,6 +10,8 @@ public class DebitorElement {  // Hier sind die daten für das gesamte json obje
     @GeneratedValue(strategy = GenerationType.IDENTITY)
    // private int id;
     private int itId;
+
+    @Column(unique = true)
     private String debitorName;
     private boolean strich;
     private double amount;
