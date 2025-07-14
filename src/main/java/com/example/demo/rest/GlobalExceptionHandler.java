@@ -44,6 +44,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-
+    @ExceptionHandler(DuplicateDebitorException.class)
+    public ResponseEntity<Map<String, Object>> handleDuplicateDebitorException(DuplicateDebitorException ex) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("status", HttpStatus.BAD_REQUEST.value());
+        error.put("error", "Bad Request");
+        error.put("message", ex.getMessage()); // <- das landet im JSON!
+        error.put("timestamp", LocalDateTime.now());
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
 
 }

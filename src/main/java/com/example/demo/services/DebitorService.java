@@ -52,4 +52,15 @@ public class DebitorService {
         }
 
     }
+
+    public DebitorElement getDebitorByNameIgnoreCase(String name){
+        return this.repository.findByDebitorNameIgnoreCase(name).orElse(null);
+    }
+
+    public boolean doesDebitorAllreadyExist(String name){
+
+        Optional<DebitorElement> existing = Optional.ofNullable(this.repository.findByDebitorNameIgnoreCase(name).orElse(null));
+        return existing.isPresent();
+
+    }
 }

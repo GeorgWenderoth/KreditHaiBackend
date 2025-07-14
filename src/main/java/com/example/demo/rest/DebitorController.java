@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 /**
@@ -25,11 +26,11 @@ public class DebitorController {
     @CrossOrigin
     @PostMapping("/neuerSchuldner")
     public ResponseEntity<DebitorElement> neuerSchuldner(@RequestBody DebitorElement element){
-        System.out.println("Testelement");
-        System.out.println( element);
-        System.out.println("punkt:" + element.getDebitorName());
-        System.out.println("id " + element.getItId());
 
+        // weiter vereinfachen?
+        if (service.doesDebitorAllreadyExist(element.getDebitorName())) {
+            throw new DuplicateDebitorException("Debitor mit diesem Namen existiert bereits.");
+        }
 
         final DebitorElement debitorElement = service.createElement(element);
         return  new ResponseEntity<>(debitorElement, HttpStatus.CREATED); // Warum nochmal returnen
