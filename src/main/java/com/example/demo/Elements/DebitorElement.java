@@ -11,7 +11,7 @@ public class DebitorElement {  // Hier sind die daten für das gesamte json obje
    // private int id;
     private int itId;
 
-  //  @Column(unique = true)
+    @Column(unique = true)
     private String debitorName;
     private boolean strich;
     private double amount;

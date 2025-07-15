@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.Elements.DebitorElement;
 import com.example.demo.repositorys.DebitorRepository;
+import com.example.demo.rest.DuplicateDebitorException;
 import com.example.demo.rest.ElementNichtVorhanden;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,14 @@ public class DebitorService {
     }
 
     public DebitorElement createElement(DebitorElement element){
+        return repository.save(element);
+    }
+
+    public DebitorElement createValidDebitor(DebitorElement element){
+        if(doesDebitorAllreadyExist(element.getDebitorName())) {
+            throw new DuplicateDebitorException("Debitor mit diesem Namen existiert bereits.");
+        }
+
         return repository.save(element);
     }
 
@@ -59,8 +68,7 @@ public class DebitorService {
 
     public boolean doesDebitorAllreadyExist(String name){
 
-        Optional<DebitorElement> existing = Optional.ofNullable(this.repository.findByDebitorNameIgnoreCase(name).orElse(null));
-        return existing.isPresent();
-
+        return getDebitorByNameIgnoreCase(name) != null;
     }
+
 }
